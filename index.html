@@ -133,7 +133,10 @@
                 </div>
             </form>
              <div class="text-xs text-slate-500 text-center">
-                <p>POWERED BY MUHAMMAD HASRATUL</p>
+                <p>Coba login sebagai:</p>
+                <p><b class="text-slate-400">Admin:</b> admin / admin123</p>
+                <p><b class="text-slate-400">Guru:</b> guru.budi / guru123</p>
+                <p><b class="text-slate-400">Siswa:</b> citra.lestari / siswa123</p>
             </div>
         </div>
     </div>
@@ -441,7 +444,7 @@
                             <input type="date" id="tanggal-filter" class="w-full rounded-md bg-slate-700 border-slate-600 text-white shadow-sm focus:border-cyan-400 focus:ring-cyan-400" style="color-scheme: dark;">
                         </div>
                     </div>
-                    <div class="overflow-x-auto"><table class="min-w-full divide-y divide-slate-700"><thead class="bg-slate-800/50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">No</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Nama Siswa</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">NIS</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status Kehadiran</th></tr></thead><tbody id="student-table-body" class="divide-y divide-slate-700"></tbody></table></div>
+                    <div class="overflow-x-auto"><table class="min-w-full divide-y divide-slate-700"><thead class="bg-slate-800/50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">No</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Nama Siswa</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">NIS</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status Kehadiran</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Catatan</th></tr></thead><tbody id="student-table-body" class="divide-y divide-slate-700"></tbody></table></div>
                 </div>`;
             
             document.getElementById('view-laporan').innerHTML = `
@@ -486,7 +489,7 @@
             const currentStudents = students[selectedKelas] || [];
 
             if (currentStudents.length === 0) {
-                studentTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-slate-400">Tidak ada data siswa di kelas ini.</td></tr>`;
+                studentTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-400">Tidak ada data siswa di kelas ini.</td></tr>`;
                 return;
             }
 
@@ -497,7 +500,7 @@
 
             currentStudents.forEach(student => {
                 if (!dayData[student.nis]) {
-                    dayData[student.nis] = { status: 'Hadir', editor: 'Sistem', timestamp: new Date().toISOString() };
+                    dayData[student.nis] = { status: 'Hadir', editor: 'Sistem', timestamp: new Date().toISOString(), note: '' };
                     
                     if (!auditLog[selectedTanggal]) auditLog[selectedTanggal] = {};
                     if (!auditLog[selectedTanggal][student.nis]) auditLog[selectedTanggal][student.nis] = [];
@@ -513,6 +516,7 @@
 
             currentStudents.forEach((student, index) => {
                 const studentStatus = dayData[student.nis].status;
+                const note = dayData[student.nis].note || '';
                 const statusButtons = Object.keys(statusConfig).map(status => {
                     const isActive = studentStatus === status;
                     const config = statusConfig[status];
@@ -521,17 +525,25 @@
 
                 const row = `<tr class="hover:bg-slate-700/50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">${index + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white flex items-center space-x-2">
-                            <span>${student.name}</span>
-                            <button title="Lihat Laporan Siswa" class="text-slate-500 hover:text-cyan-400" onclick="showStudentReportModal('${student.nis}', '${student.name}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12v5h4"/><path d="M15 7v10h4"/></svg>
-                            </button>
-                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${student.name}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">${student.nis}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400"><div class="flex items-center space-x-2">${statusButtons}<button title="Lihat Riwayat" class="text-slate-500 hover:text-cyan-400" onclick="showAuditModal('${student.nis}', '${student.name}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg></button></div></td></tr>`;
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400"><div class="flex items-center space-x-2">${statusButtons}<button title="Lihat Riwayat" class="text-slate-500 hover:text-cyan-400" onclick="showAuditModal('${student.nis}', '${student.name}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg></button></div></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><input type="text" data-nis="${student.nis}" class="note-input w-full bg-slate-800 border-slate-600 rounded px-2 py-1 text-sm text-slate-200 focus:ring-cyan-400 focus:border-cyan-400" onchange="handleNoteChange(this)" value="${note}" placeholder="Catatan..."></td>
+                    </tr>`;
                 studentTableBody.insertAdjacentHTML('beforeend', row);
             });
             document.querySelectorAll('.status-btn').forEach(btn => btn.addEventListener('click', handleStatusChange));
+        }
+        
+        function handleNoteChange(inputElement) {
+            const nis = inputElement.dataset.nis;
+            const note = inputElement.value.trim();
+
+            if (attendanceData[selectedTanggal] && attendanceData[selectedTanggal][nis]) {
+                attendanceData[selectedTanggal][nis].note = note;
+                saveDataToStorage();
+                showToast(`Catatan untuk siswa NIS ${nis} diperbarui.`);
+            }
         }
         
         function handleStatusChange(event) {
@@ -543,9 +555,10 @@
 
             const currentRecord = attendanceData[selectedTanggal][nis];
             const oldStatus = currentRecord ? currentRecord.status : 'Hadir';
+            const existingNote = currentRecord ? currentRecord.note : '';
 
             if (oldStatus !== status) {
-                attendanceData[selectedTanggal][nis] = { status, editor: currentUser.name, timestamp: timestamp.toISOString() };
+                attendanceData[selectedTanggal][nis] = { status, editor: currentUser.name, timestamp: timestamp.toISOString(), note: existingNote };
                 auditLog[selectedTanggal][nis].push({ from: oldStatus, to: status, user: currentUser.name, timestamp: timestamp.toISOString() });
                 const studentName = (students[selectedKelas]?.find(s=>s.nis === nis) || {}).name || 'Siswa';
                 showToast(`Status ${studentName} diubah menjadi ${status}.`);
@@ -612,8 +625,10 @@
                         let summary = { Hadir: 0, Sakit: 0, Izin: 0, Alpha: 0, Terlambat: 0 };
                         allDates.forEach(date => { 
                             const dayData = attendanceData[date];
-                            const status = (dayData && dayData[student.nis]) ? dayData[student.nis].status : 'Alpha';
-                            row[date] = status; 
+                            const record = dayData && dayData[student.nis];
+                            const status = record ? record.status : 'Alpha';
+                            row[date] = status;
+                            row[`${date}_note`] = record ? record.note : '';
                             if(summary[status] !== undefined) summary[status]++; 
                         });
                         row.summary = summary;
@@ -626,15 +641,41 @@
             displayTopStudentsReport(reportData);
         }
         function displayReport(data, dates) {
-            const head = document.getElementById('report-table-head'); const body = document.getElementById('report-table-body');
+            const head = document.getElementById('report-table-head'); 
+            const body = document.getElementById('report-table-body');
+            const isSingleDayReport = dates.length === 1;
+
             let headerHtml = '<tr><th class="px-3 py-3 text-left text-xs font-medium text-slate-400 uppercase">Nama Siswa</th><th class="px-3 py-3 text-left text-xs font-medium text-slate-400 uppercase">Kelas</th>';
-            dates.forEach(d => { headerHtml += `<th class="px-3 py-3 text-center text-xs font-medium text-slate-400 uppercase">${new Date(d).getDate()}</th>`; });
+            
+            if (isSingleDayReport) {
+                 headerHtml += `<th class="px-3 py-3 text-center text-xs font-medium text-slate-400 uppercase">Status</th>`;
+                 headerHtml += `<th class="px-3 py-3 text-left text-xs font-medium text-slate-400 uppercase">Catatan</th>`;
+            } else {
+                dates.forEach(d => { headerHtml += `<th class="px-3 py-3 text-center text-xs font-medium text-slate-400 uppercase">${new Date(d).getDate()}</th>`; });
+            }
+            
             headerHtml += '<th class="px-3 py-3 text-center text-xs font-medium text-green-400 uppercase">H</th><th class="px-3 py-3 text-center text-xs font-medium text-yellow-400 uppercase">S</th><th class="px-3 py-3 text-center text-xs font-medium text-sky-400 uppercase">I</th><th class="px-3 py-3 text-center text-xs font-medium text-red-400 uppercase">A</th><th class="px-3 py-3 text-center text-xs font-medium text-purple-400 uppercase">T</th></tr>';
             head.innerHTML = headerHtml;
+            
             let bodyHtml = '';
             data.forEach(row => {
-                bodyHtml += `<tr class="hover:bg-slate-700/50"><td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-white">${row.nama}</td><td class="px-3 py-2 whitespace-nowrap text-sm text-slate-400">${row.kelas}</td>`;
-                dates.forEach(d => { const status = row[d]; const config = statusConfig[status]; bodyHtml += `<td class="px-3 py-2 text-center text-sm"><span class="font-mono text-xs font-bold px-1.5 py-0.5 rounded ${config.color}">${status.charAt(0)}</span></td>`; });
+                bodyHtml += `<tr class="hover:bg-slate-700/50"><td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-white flex items-center space-x-2">
+                    <span>${row.nama}</span>
+                    <button title="Lihat Laporan Siswa" class="text-slate-500 hover:text-cyan-400" onclick="showStudentReportModal('${row.nis}', '${row.nama}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12v5h4"/><path d="M15 7v10h4"/></svg>
+                    </button>
+                </td><td class="px-3 py-2 whitespace-nowrap text-sm text-slate-400">${row.kelas}</td>`;
+                
+                if (isSingleDayReport) {
+                    const status = row[dates[0]];
+                    const note = row[`${dates[0]}_note`] || '';
+                    const config = statusConfig[status];
+                    bodyHtml += `<td class="px-3 py-2 text-center text-sm"><span class="font-mono text-xs font-bold px-1.5 py-0.5 rounded ${config.color}">${status}</span></td>`;
+                    bodyHtml += `<td class="px-3 py-2 text-sm text-slate-400">${note}</td>`;
+                } else {
+                    dates.forEach(d => { const status = row[d]; const config = statusConfig[status]; bodyHtml += `<td class="px-3 py-2 text-center text-sm"><span class="font-mono text-xs font-bold px-1.5 py-0.5 rounded ${config.color}">${status.charAt(0)}</span></td>`; });
+                }
+
                 bodyHtml += `<td class="px-3 py-2 text-center text-sm font-semibold text-green-400">${row.summary.Hadir}</td><td class="px-3 py-2 text-center text-sm font-semibold text-yellow-400">${row.summary.Sakit}</td><td class="px-3 py-2 text-center text-sm font-semibold text-sky-400">${row.summary.Izin}</td><td class="px-3 py-2 text-center text-sm font-semibold text-red-400">${row.summary.Alpha}</td><td class="px-3 py-2 text-center text-sm font-semibold text-purple-400">${row.summary.Terlambat}</td></tr>`;
             });
             body.innerHTML = bodyHtml;
@@ -1021,5 +1062,4 @@
     </script>
 </body>
 </html>
-
 
