@@ -41,9 +41,10 @@
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
         }
         .tab-active {
-            border-bottom-color: #22D3EE; /* cyan-400 */
-            color: #22D3EE;
+            background: linear-gradient(to right, #22D3EE, #3B82F6); /* cyan-400 to blue-500 */
+            color: #ffffff;
             font-weight: 600;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
         }
         .view {
             display: none;
@@ -169,15 +170,15 @@
         <!-- Main Content -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Navigation Tabs -->
-            <div id="main-nav" class="border-b border-slate-700 mb-6">
-                <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                    <button id="tab-presensi" onclick="showView('presensi')" class="tab py-4 px-1 border-b-2 font-medium text-sm">
+            <div id="main-nav" class="mb-6 flex justify-center">
+                <nav class="flex space-x-2 glass-card p-1 rounded-full" aria-label="Tabs">
+                    <button id="tab-presensi" onclick="showView('presensi')" class="tab py-2 px-4 rounded-full font-medium text-sm transition-colors duration-300">
                         Input Kehadiran
                     </button>
-                    <button id="tab-laporan" onclick="showView('laporan')" class="tab py-4 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 font-medium text-sm">
+                    <button id="tab-laporan" onclick="showView('laporan')" class="tab py-2 px-4 rounded-full font-medium text-sm transition-colors duration-300">
                         Laporan
                     </button>
-                    <button id="tab-pengaturan" onclick="showView('pengaturan')" class="tab py-4 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-600 font-medium text-sm">
+                    <button id="tab-pengaturan" onclick="showView('pengaturan')" class="tab py-2 px-4 rounded-full font-medium text-sm transition-colors duration-300">
                         Pengaturan
                     </button>
                 </nav>
@@ -197,18 +198,39 @@
                  <div id="view-pengaturan" class="view">
                      <div class="glass-card p-6 rounded-xl shadow-lg">
                         <h2 class="text-lg font-semibold text-white mb-4">Pengaturan Sistem</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- User Management Card -->
-                            <div class="p-4 border border-slate-700 rounded-lg flex flex-col glass-card">
-                                <h3 class="font-semibold text-white">Manajemen Pengguna</h3>
-                                <p class="text-sm text-slate-400 mt-1 flex-grow">Tambah, edit, atau hapus data admin, guru, dan siswa.</p>
-                                <button onclick="openUserModal()" class="mt-3 text-sm text-white font-semibold py-2 px-4 rounded-md w-full btn-primary">Kelola Pengguna</button>
+                        <div class="space-y-6">
+                             <!-- User & Class Management -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="p-4 border border-slate-700 rounded-lg flex flex-col glass-card">
+                                    <h3 class="font-semibold text-white">Manajemen Pengguna</h3>
+                                    <p class="text-sm text-slate-400 mt-1 flex-grow">Tambah, edit, atau hapus data admin, guru, dan siswa.</p>
+                                    <button onclick="openUserModal()" class="mt-3 text-sm text-white font-semibold py-2 px-4 rounded-md w-full btn-primary">Kelola Pengguna</button>
+                                </div>
+                                <div class="p-4 border border-slate-700 rounded-lg flex flex-col glass-card">
+                                    <h3 class="font-semibold text-white">Manajemen Kelas & Siswa</h3>
+                                    <p class="text-sm text-slate-400 mt-1 flex-grow">Atur daftar kelas dan alokasi siswa per kelas.</p>
+                                    <button onclick="openClassModal()" class="mt-3 text-sm text-white font-semibold py-2 px-4 rounded-md w-full btn-primary">Kelola Kelas</button>
+                                </div>
                             </div>
-                             <!-- Class Management Card -->
-                            <div class="p-4 border border-slate-700 rounded-lg flex flex-col glass-card">
-                                <h3 class="font-semibold text-white">Manajemen Kelas & Siswa</h3>
-                                <p class="text-sm text-slate-400 mt-1 flex-grow">Atur daftar kelas dan alokasi siswa per kelas.</p>
-                                <button onclick="openClassModal()" class="mt-3 text-sm text-white font-semibold py-2 px-4 rounded-md w-full btn-primary">Kelola Kelas</button>
+                             <!-- Data Management -->
+                             <div class="glass-card p-6 rounded-xl shadow-lg border border-slate-700">
+                                <h2 class="text-lg font-semibold text-white mb-4">Manajemen Data Aplikasi</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <button onclick="backupData()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-md flex items-center justify-center space-x-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+                                        <span>Backup Data</span>
+                                    </button>
+                                    <button onclick="document.getElementById('restore-input').click()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md flex items-center justify-center space-x-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 12.5A2.5 2.5 0 0 1 3 10h10a2.5 2.5 0 0 1 2.5 2.5v2.5a.5.5 0 0 1-1 0v-2.5a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 12.5v2.5a.5.5 0 0 1-1 0v-2.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+                                        <span>Restore Data</span>
+                                    </button>
+                                    <input type="file" id="restore-input" class="hidden" accept=".json" onchange="restoreData(event)">
+                                    <button onclick="resetAllData()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md flex items-center justify-center space-x-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                                        <span>Hapus Semua Data</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-4">Backup akan mengunduh semua data sebagai file JSON. Restore akan menimpa semua data saat ini. Hapus Data akan mengembalikan aplikasi ke kondisi awal.</p>
                             </div>
                         </div>
                     </div>
@@ -365,7 +387,7 @@
 
             if (currentUser.role === 'admin' || currentUser.role === 'guru') {
                 adminGuruContent.style.display = 'block';
-                mainNav.style.display = 'block';
+                mainNav.style.display = 'flex';
                 document.getElementById('tab-presensi').style.display = 'block';
                 document.getElementById('tab-laporan').style.display = 'block';
                 document.getElementById('tab-pengaturan').style.display = currentUser.role === 'admin' ? 'block' : 'none';
@@ -565,9 +587,19 @@
         function showView(viewName) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
             document.getElementById(`view-${viewName}`).classList.add('view-active');
-            document.querySelectorAll('nav button.tab').forEach(b => b.classList.remove('tab-active'));
+            
+            // Reset all tabs
+            document.querySelectorAll('nav button.tab').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('text-slate-400', 'hover:text-white');
+            });
+
+            // Set the active tab
             const activeTab = document.getElementById(`tab-${viewName}`);
-            if(activeTab) activeTab.classList.add('tab-active');
+            if(activeTab) {
+                activeTab.classList.add('tab-active');
+                activeTab.classList.remove('text-slate-400', 'hover:text-white');
+            }
         }
         
         function showAuditModal(nis, name) {
@@ -749,6 +781,63 @@
         }
         
         // --- ADMIN SETTINGS FUNCTIONS ---
+        // Data Management
+        function backupData() {
+            const dataToBackup = { users, students, attendanceData, auditLog };
+            const dataStr = JSON.stringify(dataToBackup, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            const date = new Date().toISOString().slice(0, 10);
+            link.download = `smartpresensi_backup_${date}.json`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast('Backup data berhasil diunduh.');
+        }
+
+        function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!confirm('Anda yakin ingin me-restore data? Semua data saat ini akan ditimpa.')) {
+                event.target.value = ''; // Reset file input
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const restoredData = JSON.parse(e.target.result);
+                    if (restoredData.users && restoredData.students && restoredData.attendanceData && restoredData.auditLog) {
+                        users = restoredData.users;
+                        students = restoredData.students;
+                        attendanceData = restoredData.attendanceData;
+                        auditLog = restoredData.auditLog;
+                        saveDataToStorage();
+                        showToast('Data berhasil di-restore. Aplikasi akan dimuat ulang.');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        alert('File backup tidak valid atau rusak.');
+                    }
+                } catch (error) {
+                    alert('Gagal membaca file backup. Pastikan file dalam format JSON yang benar.');
+                    console.error("Restore error:", error);
+                } finally {
+                    event.target.value = ''; // Reset file input
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetAllData() {
+            if (confirm('PERINGATAN: Anda akan menghapus SEMUA data (pengguna, kelas, siswa, dan kehadiran). Hanya akun admin default yang akan tersisa. Aksi ini tidak dapat dibatalkan. Lanjutkan?')) {
+                localStorage.removeItem(APP_DATA_KEY);
+                showToast('Semua data telah dihapus. Aplikasi akan dimuat ulang.');
+                setTimeout(() => location.reload(), 1500);
+            }
+        }
+        
         function openUserModal() { 
             document.getElementById('user-management-modal').classList.add('flex');
             clearUserForm();
@@ -1045,5 +1134,4 @@
     </script>
 </body>
 </html>
-
 
