@@ -133,10 +133,9 @@
                 </div>
             </form>
              <div class="text-xs text-slate-500 text-center">
-                <p>Coba login sebagai:</p>
+                <p>Akun default:</p>
                 <p><b class="text-slate-400">Admin:</b> admin / admin123</p>
-                <p><b class="text-slate-400">Guru:</b> guru.budi / guru123</p>
-                <p><b class="text-slate-400">Siswa:</b> citra.lestari / siswa123</p>
+                <p>Silakan login sebagai admin untuk menambahkan pengguna lain.</p>
             </div>
         </div>
     </div>
@@ -296,29 +295,13 @@
         }
         
         function initializeMockData() {
+            // Only the admin account is kept. All other data is cleared.
             users = {
-                'admin': { pass: 'admin123', role: 'admin', name: 'Admin Utama', gender: 'L' },
-                'guru.budi': { pass: 'guru123', role: 'guru', name: 'Budi Santoso', gender: 'L' },
-                'citra.lestari': { pass: 'siswa123', role: 'siswa', name: 'Citra Lestari', nis: '1003', kelas: '10A', gender: 'P' },
-                'ahmad.dahlan': { pass: 'siswa123', role: 'siswa', name: 'Ahmad Dahlan', nis: '1001', kelas: '10A', gender: 'L' },
+                'admin': { pass: 'admin123', role: 'admin', name: 'Admin Utama', gender: 'L' }
             };
-            students = {
-                '10A': [
-                    { nis: '1001', name: 'Ahmad Dahlan', gender: 'L' }, 
-                    { nis: '1002', name: 'Budi Hartono', gender: 'L' },
-                    { nis: '1003', name: 'Citra Lestari', gender: 'P' }, 
-                    { nis: '1004', name: 'Dewi Anggraini', gender: 'P' },
-                ],
-                '10B': [ 
-                    { nis: '1005', name: 'Eka Wijaya', gender: 'L' }, 
-                    { nis: '1006', name: 'Fajar Nugroho', gender: 'L' } 
-                ],
-                '11A': [
-                    { nis: '1101', name: 'Gita Permata', gender: 'P' }, 
-                    { nis: '1102', name: 'Hendra Gunawan', gender: 'L' }, 
-                    { nis: '1103', name: 'Indah Sari', gender: 'P' },
-                ],
-            };
+            // Student data is emptied.
+            students = {};
+            // Attendance and audit logs are emptied.
             attendanceData = {};
             auditLog = {};
             saveDataToStorage();
