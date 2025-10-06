@@ -396,7 +396,7 @@
             Hadir: { text: "Hadir", color: "bg-green-500/20 text-green-300", ring: "ring-green-400", chartColor: '#4ADE80' },
             Sakit: { text: "Sakit", color: "bg-yellow-500/20 text-yellow-300", ring: "ring-yellow-400", chartColor: '#FACC15' },
             Izin: { text: "Izin", color: "bg-sky-500/20 text-sky-300", ring: "ring-sky-400", chartColor: '#38BDF8' },
-            Alpha: { text: "Alpha", color: "bg-red-500/20 text-red-300", ring: "ring-red-400", chartColor: '#F87171' },
+            Alpa: { text: "Alpa", color: "bg-red-500/20 text-red-300", ring: "ring-red-400", chartColor: '#F87171' },
             Terlambat: { text: "Terlambat", color: "bg-purple-500/20 text-purple-300", ring: "ring-purple-400", chartColor: '#C084FC' },
         };
         
@@ -474,7 +474,7 @@
 
             // Inisialisasi statistik kelas
             Object.keys(students).forEach(className => {
-                classStats[className] = { name: className, alphaCount: 0 };
+                classStats[className] = { name: className, alpaCount: 0 };
             });
 
             // Inisialisasi statistik siswa
@@ -483,7 +483,7 @@
                     nis: student.nis,
                     name: student.name,
                     kelas: Object.keys(students).find(k => students[k].some(s => s.nis === student.nis)),
-                    Hadir: 0, Sakit: 0, Izin: 0, Alpha: 0, Terlambat: 0
+                    Hadir: 0, Sakit: 0, Izin: 0, Alpa: 0, Terlambat: 0
                 };
             });
 
@@ -494,8 +494,8 @@
                         if(studentStats[nis][record.status] !== undefined) {
                             studentStats[nis][record.status]++;
                         }
-                        if (record.status === 'Alpha' && studentStats[nis].kelas && classStats[studentStats[nis].kelas]) {
-                            classStats[studentStats[nis].kelas].alphaCount++;
+                        if (record.status === 'Alpa' && studentStats[nis].kelas && classStats[studentStats[nis].kelas]) {
+                            classStats[studentStats[nis].kelas].alpaCount++;
                         }
                     }
                 });
@@ -503,9 +503,9 @@
 
             const allStudentsArray = Object.values(studentStats);
 
-            const topClassesAlpha = Object.values(classStats)
-                .filter(c => c.alphaCount > 0)
-                .sort((a, b) => b.alphaCount - a.alphaCount)
+            const topClassesAlpa = Object.values(classStats)
+                .filter(c => c.alpaCount > 0)
+                .sort((a, b) => b.alpaCount - a.alpaCount)
                 .slice(0, 5); // Mengambil 5 teratas sesuai permintaan
 
 
@@ -545,23 +545,23 @@
             dashboardView.innerHTML = `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 space-y-6">
-                        ${createTopListHTML('Top 10 Siswa Alpha', allStudentsArray, 'Alpha', 'Alpha')}
+                        ${createTopListHTML('Top 10 Siswa Alpa', allStudentsArray, 'Alpa', 'Alpa')}
                         ${createTopListHTML('Top 10 Siswa Izin', allStudentsArray, 'Izin', 'Izin')}
                     </div>
                     <div class="space-y-6">
                         ${createTopListHTML('Top 10 Siswa Sakit', allStudentsArray, 'Sakit', 'Sakit')}
                         
                         <div class="glass-card p-4 rounded-xl flex flex-col">
-                            <h3 class="font-semibold text-white mb-3">Top 5 Kelas Rawan Alpha</h3>
+                            <h3 class="font-semibold text-white mb-3">Top 5 Kelas Rawan Alpa</h3>
                             <div class="overflow-y-auto max-h-80 pr-2">
-                                ${topClassesAlpha.length > 0 ? `
+                                ${topClassesAlpa.length > 0 ? `
                                 <ul class="space-y-2">
-                                    ${topClassesAlpha.map(c => `
+                                    ${topClassesAlpa.map(c => `
                                     <li class="text-sm flex justify-between items-center p-2 rounded-md hover:bg-slate-700/50">
                                         <span class="font-medium text-slate-200">${c.name}</span>
-                                        <span class="font-bold text-red-400">${c.alphaCount} Alpha</span>
+                                        <span class="font-bold text-red-400">${c.alpaCount} Alpa</span>
                                     </li>`).join('')}
-                                </ul>` : `<p class="text-sm text-slate-400 text-center py-8">Tidak ada kelas dengan catatan alpha.</p>`}
+                                </ul>` : `<p class="text-sm text-slate-400 text-center py-8">Tidak ada kelas dengan catatan alpa.</p>`}
                             </div>
                         </div>
                     </div>
@@ -575,7 +575,7 @@
             const tableBody = document.getElementById('student-attendance-table');
             
             let studentRecords = [];
-            let summary = { Hadir: 0, Sakit: 0, Izin: 0, Alpha: 0, Terlambat: 0 };
+            let summary = { Hadir: 0, Sakit: 0, Izin: 0, Alpa: 0, Terlambat: 0 };
 
             Object.keys(attendanceData).forEach(date => {
                 if (attendanceData[date] && attendanceData[date][studentNis]) {
@@ -642,7 +642,7 @@
             document.getElementById('user-management-modal').innerHTML = `
                  <div class="glass-card rounded-lg shadow-xl w-full max-w-3xl"><div class="p-5 border-b border-slate-700 flex justify-between items-center"><h3 class="text-lg font-semibold text-white">Manajemen Pengguna</h3><button onclick="closeModal('user-management-modal')" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button></div><div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-6"><div class="md:col-span-2"><h4 class="font-medium text-white mb-2">Daftar Pengguna</h4><div class="overflow-y-auto max-h-96 border border-slate-700 rounded-lg"><table class="min-w-full divide-y divide-slate-700"><thead class="bg-slate-800/50 sticky top-0"><tr><th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Username</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Nama</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Gender</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Peran</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Aksi</th></tr></thead><tbody id="user-list-body" class="divide-y divide-slate-700"></tbody></table></div></div><div><h4 class="font-medium mb-2 text-white" id="user-form-title">Tambah Pengguna Baru</h4><form id="user-form" class="space-y-3"><input type="hidden" id="edit-username"><input type="hidden" id="original-username"><div><label class="text-sm text-slate-300">Username</label><input id="user-username" type="text" required class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"></div><div><label class="text-sm text-slate-300">Nama Lengkap</label><input id="user-fullname" type="text" required class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"></div><div><label class="text-sm text-slate-300">Password</label><input id="user-password" type="password" required class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"></div><div><label class="text-sm text-slate-300">Jenis Kelamin</label><select id="user-gender" class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div><div><label class="text-sm text-slate-300">Peran</label><select id="user-role-select" class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"><option value="admin">Admin</option><option value="guru">Guru</option><option value="siswa">Siswa</option></select></div><div id="siswa-fields" class="hidden"><p class="text-xs text-slate-400 pt-2 border-t border-slate-700">Jika peran adalah siswa, NIS akan digunakan sebagai username. Siswa ditambahkan melalui Manajemen Kelas.</p></div><div class="flex space-x-2 mt-4"><button type="submit" class="w-full text-white py-2 rounded btn-primary">Simpan</button><button type="button" id="clear-user-form-btn" class="w-full bg-slate-600 text-white py-2 rounded">Batal</button></div></form></div></div></div>`;
             document.getElementById('class-management-modal').innerHTML = `
-                 <div class="glass-card rounded-lg shadow-xl w-full max-w-4xl"><div class="p-5 border-b border-slate-700 flex justify-between items-center"><h3 class="text-lg font-semibold text-white">Manajemen Kelas & Siswa</h3><button onclick="closeModal('class-management-modal')" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button></div><div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-6"><div class="md:col-span-1"><h4 class="font-medium text-white mb-2">Daftar Kelas</h4><div id="class-list" class="space-y-2 max-h-96 overflow-y-auto pr-2"></div><h4 class="font-medium text-white mb-2 mt-4">Tambah Kelas Baru</h4><form id="class-form" class="flex space-x-2"><input id="class-name-input" type="text" placeholder="Nama Kelas" required class="w-full p-2 rounded bg-slate-700 border-slate-600 text-white"><button type="submit" class="p-2 rounded btn-primary text-white">+</button></form></div><div class="md:col-span-2"><div class="flex justify-between items-center mb-2 flex-wrap gap-2"><h4 class="font-medium text-white">Siswa di Kelas <span id="selected-class-name" class="font-bold text-cyan-400"></span></h4><div class="flex space-x-2"><button id="import-excel-btn" class="text-sm bg-teal-500 hover:bg-teal-600 text-white font-semibold py-1 px-3 rounded-md">Import Excel</button><button id="add-student-btn" class="text-sm bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-3 rounded-md">Tambah Siswa</button><input type="file" id="excel-file-input" class="hidden" accept=".xlsx, .xls"></div></div><p class="text-xs text-slate-400 mb-2">Import Excel harus memiliki kolom: <strong>NIS, Nama, Gender (L/P)</strong>.</p><div id="student-in-class-list" class="overflow-y-auto max-h-96 border border-slate-700 rounded-lg"><table class="min-w-full divide-y divide-slate-700"><thead class="bg-slate-800/50 sticky top-0"><tr><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">NIS</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">Nama</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">Gender</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">Aksi</th></tr></thead><tbody id="student-in-class-tbody" class="divide-y divide-slate-700"></tbody></table></div><div id="add-student-form-container" class="mt-4 p-4 border border-slate-700 rounded-lg hidden"><h5 class="font-medium text-white mb-2">Form Siswa</h5><form id="add-student-form" class="space-y-2"><input type="hidden" id="edit-student-nis"><div><label class="text-sm text-slate-300">NIS</label><input id="student-nis-input" required class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"></div><div><label class="text-sm text-slate-300">Nama Lengkap</label><input id="student-name-input" required class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"></div><div><label class="text-sm text-slate-300">Jenis Kelamin</label><select id="student-gender-input" class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div><div class="flex space-x-2"><button type="submit" class="text-white px-4 py-2 rounded btn-primary">Simpan</button><button type="button" id="cancel-add-student-btn" class="bg-slate-600 px-4 py-2 rounded text-white">Batal</button></div></form></div></div></div></div>`;
+                 <div class="glass-card rounded-lg shadow-xl w-full max-w-4xl"><div class="p-5 border-b border-slate-700 flex justify-between items-center"><h3 class="text-lg font-semibold text-white">Manajemen Kelas & Siswa</h3><button onclick="closeModal('class-management-modal')" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button></div><div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-6 max-h-[80vh] overflow-y-auto"><div class="md:col-span-1"><h4 class="font-medium text-white mb-2">Daftar Kelas</h4><div id="class-list" class="space-y-2 max-h-96 overflow-y-auto pr-2"></div><h4 class="font-medium text-white mb-2 mt-4">Tambah Kelas Baru</h4><form id="class-form" class="flex space-x-2"><input id="class-name-input" type="text" placeholder="Nama Kelas" required class="w-full p-2 rounded bg-slate-700 border-slate-600 text-white"><button type="submit" class="p-2 rounded btn-primary text-white">+</button></form></div><div class="md:col-span-2"><div class="flex justify-between items-center mb-2 flex-wrap gap-2"><h4 class="font-medium text-white">Siswa di Kelas <span id="selected-class-name" class="font-bold text-cyan-400"></span></h4><div class="flex space-x-2"><button id="import-excel-btn" class="text-sm bg-teal-500 hover:bg-teal-600 text-white font-semibold py-1 px-3 rounded-md">Import Excel</button><button id="add-student-btn" class="text-sm bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-3 rounded-md">Tambah Siswa</button><input type="file" id="excel-file-input" class="hidden" accept=".xlsx, .xls"></div></div><p class="text-xs text-slate-400 mb-2">Import Excel harus memiliki kolom: <strong>NIS, Nama, Gender (L/P)</strong>.</p><div id="student-in-class-list" class="overflow-y-auto max-h-96 border border-slate-700 rounded-lg"><table class="min-w-full divide-y divide-slate-700"><thead class="bg-slate-800/50 sticky top-0"><tr><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">NIS</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">Nama</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">Gender</th><th class="px-4 py-2 text-left text-xs font-medium text-slate-400">Aksi</th></tr></thead><tbody id="student-in-class-tbody" class="divide-y divide-slate-700"></tbody></table></div><div id="add-student-form-container" class="mt-4 p-4 border border-slate-700 rounded-lg hidden"><h5 class="font-medium text-white mb-2">Form Siswa</h5><form id="add-student-form" class="space-y-2"><input type="hidden" id="edit-student-nis"><div><label class="text-sm text-slate-300">NIS</label><input id="student-nis-input" required class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"></div><div><label class="text-sm text-slate-300">Nama Lengkap</label><input id="student-name-input" required class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"></div><div><label class="text-sm text-slate-300">Jenis Kelamin</label><select id="student-gender-input" class="w-full text-sm p-2 mt-1 rounded bg-slate-700 border-slate-600 text-white"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div><div class="flex space-x-2"><button type="submit" class="text-white px-4 py-2 rounded btn-primary">Simpan</button><button type="button" id="cancel-add-student-btn" class="bg-slate-600 px-4 py-2 rounded text-white">Batal</button></div></form></div></div></div></div>`;
         }
         
         function setupEventListeners() {
@@ -761,7 +761,7 @@
                 auditLog[selectedTanggal][nis].push({ from: oldStatus, to: status, user: currentUser.name, timestamp: timestamp.toISOString() });
                 const studentName = (students[selectedKelas]?.find(s=>s.nis === nis) || {}).name || 'Siswa';
                 showToast(`Status ${studentName} diubah menjadi ${status}.`);
-                if (status === 'Alpha' || status === 'Terlambat') {
+                if (status === 'Alpa' || status === 'Terlambat') {
                     setTimeout(() => showToast(`Notifikasi ${status} dikirim ke wali murid.`, 'info'), 1000);
                 }
             }
@@ -837,7 +837,7 @@
                 if (students[k]) {
                     students[k].forEach(student => {
                         let row = { kelas: k, nis: student.nis, nama: student.name };
-                        let summary = { Hadir: 0, Sakit: 0, Izin: 0, Alpha: 0, Terlambat: 0 };
+                        let summary = { Hadir: 0, Sakit: 0, Izin: 0, Alpa: 0, Terlambat: 0 };
                         allDates.forEach(date => { 
                             const dayData = attendanceData[date];
                             const record = dayData && dayData[student.nis];
@@ -891,7 +891,7 @@
                     dates.forEach(d => { const status = row[d]; const config = statusConfig[status]; bodyHtml += `<td class="px-3 py-2 text-center text-sm"><span class="font-mono text-xs font-bold px-1.5 py-0.5 rounded ${config.color}">${status.charAt(0)}</span></td>`; });
                 }
 
-                bodyHtml += `<td class="px-3 py-2 text-center text-sm font-semibold text-green-400">${row.summary.Hadir}</td><td class="px-3 py-2 text-center text-sm font-semibold text-yellow-400">${row.summary.Sakit}</td><td class="px-3 py-2 text-center text-sm font-semibold text-sky-400">${row.summary.Izin}</td><td class="px-3 py-2 text-center text-sm font-semibold text-red-400">${row.summary.Alpha}</td><td class="px-3 py-2 text-center text-sm font-semibold text-purple-400">${row.summary.Terlambat}</td></tr>`;
+                bodyHtml += `<td class="px-3 py-2 text-center text-sm font-semibold text-green-400">${row.summary.Hadir}</td><td class="px-3 py-2 text-center text-sm font-semibold text-yellow-400">${row.summary.Sakit}</td><td class="px-3 py-2 text-center text-sm font-semibold text-sky-400">${row.summary.Izin}</td><td class="px-3 py-2 text-center text-sm font-semibold text-red-400">${row.summary.Alpa}</td><td class="px-3 py-2 text-center text-sm font-semibold text-purple-400">${row.summary.Terlambat}</td></tr>`;
             });
             body.innerHTML = bodyHtml;
             document.getElementById('report-title').textContent = `Laporan Kehadiran Kelas ${document.getElementById('laporan-kelas-filter').value}`;
@@ -1006,7 +1006,7 @@
 
         function exportToExcel() {
             if (currentReportData.length === 0) return;
-            const dataToExport = currentReportData.map(row => { let excelRow = { Kelas: row.kelas, NIS: row.nis, "Nama Siswa": row.nama, Hadir: row.summary.Hadir, Sakit: row.summary.Sakit, Izin: row.summary.Izin, Alpha: row.summary.Alpha, Terlambat: row.summary.Terlambat }; Object.keys(row).forEach(key => { if (key.match(/^\d{4}-\d{2}-\d{2}$/)) { excelRow[key] = row[key]; } }); return excelRow; });
+            const dataToExport = currentReportData.map(row => { let excelRow = { Kelas: row.kelas, NIS: row.nis, "Nama Siswa": row.nama, Hadir: row.summary.Hadir, Sakit: row.summary.Sakit, Izin: row.summary.Izin, Alpa: row.summary.Alpa, Terlambat: row.summary.Terlambat }; Object.keys(row).forEach(key => { if (key.match(/^\d{4}-\d{2}-\d{2}$/)) { excelRow[key] = row[key]; } }); return excelRow; });
             const ws = XLSX.utils.json_to_sheet(dataToExport); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Laporan Kehadiran"); XLSX.writeFile(wb, "Laporan_Kehadiran.xlsx");
         }
         
@@ -1050,7 +1050,7 @@
                 } else {
                     dates.forEach(d => studentRow.push(row[d].charAt(0)));
                 }
-                studentRow.push(row.summary.Hadir, row.summary.Sakit, row.summary.Izin, row.summary.Alpha, row.summary.Terlambat);
+                studentRow.push(row.summary.Hadir, row.summary.Sakit, row.summary.Izin, row.summary.Alpa, row.summary.Terlambat);
                 return studentRow;
             });
 
@@ -1096,7 +1096,7 @@
                 return;
             }
             const topHadir = [...reportData].sort((a, b) => b.summary.Hadir - a.summary.Hadir).slice(0, 5);
-            const topAlpha = [...reportData].sort((a, b) => b.summary.Alpha - a.summary.Alpha).filter(s => s.summary.Alpha > 0).slice(0, 5);
+            const topAlpa = [...reportData].sort((a, b) => b.summary.Alpa - a.summary.Alpa).filter(s => s.summary.Alpa > 0).slice(0, 5);
 
             container.innerHTML = `
                 <div class="border border-slate-700 rounded-lg p-4 glass-card">
@@ -1106,10 +1106,10 @@
                     </ul>
                 </div>
                 <div class="border border-slate-700 rounded-lg p-4 glass-card">
-                    <h4 class="font-semibold text-white mb-3">Top 5 Siswa Paling Sering Alpha</h4>
-                    ${topAlpha.length > 0 ? `<ul class="space-y-2">
-                        ${topAlpha.map(s => `<li class="text-sm flex justify-between text-slate-300"><span>${s.nama} <span class="text-slate-500">(${s.kelas})</span></span> <span class="font-bold text-red-400">${s.summary.Alpha} hari</span></li>`).join('')}
-                    </ul>` : `<p class="text-sm text-slate-400">Tidak ada siswa yang alpha pada periode ini.</p>`}
+                    <h4 class="font-semibold text-white mb-3">Top 5 Siswa Paling Sering Alpa</h4>
+                    ${topAlpa.length > 0 ? `<ul class="space-y-2">
+                        ${topAlpa.map(s => `<li class="text-sm flex justify-between text-slate-300"><span>${s.nama} <span class="text-slate-500">(${s.kelas})</span></span> <span class="font-bold text-red-400">${s.summary.Alpa} hari</span></li>`).join('')}
+                    </ul>` : `<p class="text-sm text-slate-400">Tidak ada siswa yang alpa pada periode ini.</p>`}
                 </div>
             `;
         }
@@ -1430,6 +1430,4 @@
     </script>
 </body>
 </html>
-
-
 
