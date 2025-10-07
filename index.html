@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPresensi - Aplikasi Kehadiran Siswa</title>
+    <title>SmartPresensi - Connect</title>
     
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,7 +15,7 @@
     
     <!-- Libraries for PDF, Excel Export, and Charts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -773,7 +773,12 @@
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toast-message');
             toastMessage.textContent = message;
-            toast.className = `fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl transform transition-all duration-300 border ${type === 'success' ? 'bg-green-500/50 border-green-400' : 'bg-sky-500/50 border-sky-400'}`;
+            
+            let styles = 'bg-green-500/50 border-green-400'; // success
+            if (type === 'info') styles = 'bg-sky-500/50 border-sky-400';
+            if (type === 'error') styles = 'bg-red-500/50 border-red-400';
+
+            toast.className = `fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-xl transform transition-all duration-300 border ${styles}`;
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
@@ -951,57 +956,90 @@
         
         function downloadStudentCardPDF() {
             const studentData = currentReportData.find(s => s.nis === currentStudentCardNis);
-            if (!studentData) return;
+            if (!studentData) {
+                showToast("Data siswa tidak ditemukan.", "error");
+                return;
+            }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    showToast("Pustaka PDF tidak termuat. Coba segarkan halaman.", "error");
+                    return;
+                }
+                const doc = new jsPDF(); // Portrait is default
 
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Kartu Informasi Kehadiran', 105, 20, { align: 'center' });
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Periode: ${document.getElementById('laporan-start-date').value} s/d ${document.getElementById('laporan-end-date').value}`, 105, 27, { align: 'center' });
+                // Header
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text(reportSettings.schoolName || 'SmartPresensi', 105, 20, { align: 'center' });
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Kartu Rincian Kehadiran Siswa', 105, 28, { align: 'center' });
+                doc.setLineWidth(0.5);
+                doc.line(20, 32, 190, 32);
 
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Informasi Siswa', 14, 40);
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Nama: ${studentData.nama}`, 14, 47);
-            doc.text(`NIS: ${studentData.nis}`, 14, 52);
-            doc.text(`Kelas: ${studentData.kelas}`, 14, 57);
+                // Student Info
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Nama Siswa', 14, 45);
+                doc.text('NIS', 14, 52);
+                doc.text('Kelas', 14, 59);
+                doc.text('Periode Laporan', 14, 66);
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text(`: ${studentData.nama}`, 50, 45);
+                doc.text(`: ${studentData.nis}`, 50, 52);
+                doc.text(`: ${studentData.kelas}`, 50, 59);
+                const startDateValue = new Date(document.getElementById('laporan-start-date').value).toLocaleDateString('id-ID');
+                const endDateValue = new Date(document.getElementById('laporan-end-date').value).toLocaleDateString('id-ID');
+                doc.text(`: ${startDateValue} s/d ${endDateValue}`, 50, 66);
+                
+                // Details Table
+                const head = [['Tanggal', 'Status Kehadiran', 'Catatan']];
+                const body = Object.keys(studentData)
+                    .filter(key => key.match(/^\d{4}-\d{2}-\d{2}$/))
+                    .sort((a, b) => new Date(a) - new Date(b))
+                    .map(date => [
+                        new Date(date).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'}),
+                        studentData[date],
+                        studentData[`${date}_note`] || '-'
+                    ]);
 
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Rekapitulasi', 14, 70);
-            let summaryText = Object.entries(studentData.summary)
-                .map(([status, count]) => `${status}: ${count}`)
-                .join('  |  ');
-            doc.setFontSize(10);
-            doc.text(summaryText, 14, 77);
-            
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Rincian Kehadiran', 14, 90);
+                if (body.length > 0) {
+                    doc.autoTable({
+                        startY: 80,
+                        head: head,
+                        body: body,
+                        theme: 'grid',
+                        headStyles: { fillColor: [30, 41, 59] }, // slate-800
+                        didParseCell: function(data) {
+                            const status = data.cell.raw;
+                            if (data.column.dataKey === 1 && statusConfig[status]) {
+                                const colorMap = {
+                                    Hadir: [22, 163, 74], // green-600
+                                    Sakit: [202, 138, 4], // yellow-500
+                                    Izin: [14, 165, 233], // sky-500
+                                    Alpa: [220, 38, 38], // red-600
+                                    Terlambat: [147, 51, 234] // purple-600
+                                };
+                                if (colorMap[status]) {
+                                    data.cell.styles.fillColor = colorMap[status];
+                                    data.cell.styles.textColor = [255, 255, 255];
+                                    data.cell.styles.fontStyle = 'bold';
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    doc.text('Tidak ada rincian data kehadiran pada periode ini.', 14, 80);
+                }
 
-            const head = [['Tanggal', 'Status Kehadiran']];
-            const body = Object.keys(studentData)
-                .filter(key => key.match(/^\d{4}-\d{2}-\d{2}$/))
-                .map(date => [
-                    new Date(date).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'}),
-                    studentData[date]
-                ]);
-            
-            doc.autoTable({
-                startY: 95,
-                head: head,
-                body: body,
-                theme: 'grid',
-                headStyles: { fillColor: [30, 41, 59] }
-            });
-
-            doc.save(`Kartu_Kehadiran_${studentData.nama}.pdf`);
+                doc.save(`Kartu_Kehadiran_${studentData.nama}.pdf`);
+            } catch (error) {
+                console.error("Student Card PDF Error:", error);
+                showToast("Gagal membuat PDF Kartu Siswa.", "error");
+            }
         }
 
         function exportToExcel() {
@@ -1015,79 +1053,121 @@
                 showToast('Tidak ada data untuk diekspor.', 'info');
                 return;
             }
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape');
-            const dates = Object.keys(currentReportData[0]).filter(key => key.match(/^\d{4}-\d{2}-\d{2}$/));
-            const isSingleDayReport = dates.length === 1;
-
-            // Header Laporan
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text(reportSettings.schoolName || 'Nama Sekolah Belum Diatur', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text('LAPORAN REKAPITULASI KEHADIRAN SISWA', doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
-            doc.setLineWidth(0.5);
-            doc.line(15, 25, doc.internal.pageSize.getWidth() - 15, 25);
-            
-            doc.setFontSize(10);
-            doc.text(`Kelas: ${document.getElementById('laporan-kelas-filter').options[document.getElementById('laporan-kelas-filter').selectedIndex].text}`, 15, 32);
-            doc.text(`Periode: ${document.getElementById('laporan-start-date').value} s/d ${document.getElementById('laporan-end-date').value}`, 15, 38);
-
-            // Persiapan Data Tabel
-            const head = [['No', 'Nama Siswa', 'Kelas']];
-            if (isSingleDayReport) {
-                head[0].push('Status', 'Catatan');
-            } else {
-                dates.forEach(d => head[0].push(new Date(d).getDate().toString()));
-            }
-            head[0].push('H', 'S', 'I', 'A', 'T');
-
-            const body = currentReportData.map((row, index) => {
-                const studentRow = [index + 1, row.nama, row.kelas];
-                if (isSingleDayReport) {
-                    studentRow.push(row[dates[0]], row[`${dates[0]}_note`] || '');
-                } else {
-                    dates.forEach(d => studentRow.push(row[d].charAt(0)));
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    showToast("Pustaka PDF tidak termuat. Coba segarkan halaman.", "error");
+                    return;
                 }
-                studentRow.push(row.summary.Hadir, row.summary.Sakit, row.summary.Izin, row.summary.Alpa, row.summary.Terlambat);
-                return studentRow;
-            });
+                const doc = new jsPDF('landscape');
 
-            // Pembuatan Tabel
-            doc.autoTable({
-                startY: 45,
-                head: head,
-                body: body,
-                theme: 'grid',
-                headStyles: { fillColor: [30, 41, 59], textColor: [226, 232, 240], halign: 'center' },
-                styles: { fontSize: 8, cellPadding: 1.5 },
-                columnStyles: {
-                    0: { halign: 'center', cellWidth: 8 },
-                    1: { cellWidth: 40 }, // Nama Siswa
-                    2: { halign: 'center' }, // Kelas
-                },
-                didParseCell: function(data) {
-                    const summaryStartIndex = isSingleDayReport ? 5 : 3 + dates.length;
-                    if (data.column.index >= 3) {
-                        data.cell.styles.halign = 'center';
+                // Info from UI
+                const kelasText = document.getElementById('laporan-kelas-filter').options[document.getElementById('laporan-kelas-filter').selectedIndex].text;
+                const startDateText = new Date(document.getElementById('laporan-start-date').value).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+                const endDateText = new Date(document.getElementById('laporan-end-date').value).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+                const printDate = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+                // Header
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text(reportSettings.schoolName || 'SmartPresensi', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Laporan Rekapitulasi Kehadiran Siswa', doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+                doc.setLineWidth(0.5);
+                doc.line(15, 25, doc.internal.pageSize.getWidth() - 15, 25);
+
+                // Info Section
+                doc.setFontSize(10);
+                doc.text(`Kelas`, 15, 32);
+                doc.text(`: ${kelasText}`, 40, 32);
+                doc.text(`Periode`, 15, 38);
+                doc.text(`: ${startDateText} s/d ${endDateText}`, 40, 38);
+                doc.text(`Tanggal Cetak`, doc.internal.pageSize.getWidth() / 2, 32);
+                doc.text(`: ${printDate}`, (doc.internal.pageSize.getWidth() / 2) + 25, 32);
+
+                // Table Data Preparation
+                const head = [['No', 'NIS', 'Nama Siswa', 'Hadir', 'Sakit', 'Izin', 'Alpa', 'Terlambat', 'Total']];
+                let totals = { hadir: 0, sakit: 0, izin: 0, alpa: 0, terlambat: 0 };
+                
+                const body = currentReportData.map((row, index) => {
+                    const totalDays = row.summary.Hadir + row.summary.Sakit + row.summary.Izin + row.summary.Alpa + row.summary.Terlambat;
+                    totals.hadir += row.summary.Hadir;
+                    totals.sakit += row.summary.Sakit;
+                    totals.izin += row.summary.Izin;
+                    totals.alpa += row.summary.Alpa;
+                    totals.terlambat += row.summary.Terlambat;
+                    
+                    return [
+                        index + 1,
+                        row.nis,
+                        row.nama,
+                        row.summary.Hadir,
+                        row.summary.Sakit,
+                        row.summary.Izin,
+                        row.summary.Alpa,
+                        row.summary.Terlambat,
+                        totalDays
+                    ];
+                });
+
+                body.push([
+                    { content: 'TOTAL', colSpan: 3, styles: { halign: 'center', fontStyle: 'bold' } },
+                    { content: totals.hadir, styles: { halign: 'center', fontStyle: 'bold' } },
+                    { content: totals.sakit, styles: { halign: 'center', fontStyle: 'bold' } },
+                    { content: totals.izin, styles: { halign: 'center', fontStyle: 'bold' } },
+                    { content: totals.alpa, styles: { halign: 'center', fontStyle: 'bold' } },
+                    { content: totals.terlambat, styles: { halign: 'center', fontStyle: 'bold' } },
+                    { content: '', styles: { halign: 'center' } }
+                ]);
+
+                // Generate Table
+                doc.autoTable({
+                    startY: 45,
+                    head: head,
+                    body: body,
+                    theme: 'grid',
+                    headStyles: { fillColor: [30, 41, 59], textColor: [226, 232, 240], halign: 'center' },
+                    styles: { fontSize: 8, cellPadding: 2 },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 10 }, 2: { cellWidth: 'auto' },
+                        3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 },
+                        5: { halign: 'center', cellWidth: 15 }, 6: { halign: 'center', cellWidth: 15 },
+                        7: { halign: 'center', cellWidth: 18 }, 8: { halign: 'center', cellWidth: 15 },
+                    },
+                    didDrawPage: function (data) {
+                        const pageHeight = doc.internal.pageSize.getHeight();
+                        doc.setFontSize(8);
+                        doc.text(`Laporan dihasilkan oleh SmartPresensi`, 15, pageHeight - 10);
+                        doc.text(`Halaman ${doc.internal.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - 25, pageHeight - 10);
                     }
+                });
+
+                // Endorsement Section
+                let finalY = doc.autoTable.previous.finalY;
+                const pageHeight = doc.internal.pageSize.getHeight();
+                let signY = finalY + 15;
+                
+                if (signY > pageHeight - 45) {
+                    doc.addPage();
+                    signY = 20;
                 }
-            });
+                
+                const endorsementTextX = doc.internal.pageSize.getWidth() - 70;
+                doc.setFontSize(10);
+                doc.text(reportSettings.endorsementPlace || `Makassar, ${printDate}`, endorsementTextX, signY);
+                doc.text('Guru / Wali Kelas,', endorsementTextX, signY + 7);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text(reportSettings.teacherName || '(___________________)', endorsementTextX, signY + 30);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`NIP: ${reportSettings.nip || '................................'}`, endorsementTextX, signY + 35);
 
-            // Footer / Pengesahan
-            const finalY = doc.autoTable.previous.finalY;
-            doc.setFontSize(10);
-            doc.text(reportSettings.endorsementPlace || 'Tempat, Tanggal', doc.internal.pageSize.getWidth() - 15, finalY + 15, { align: 'right' });
-            doc.text('Guru / Wali Kelas,', doc.internal.pageSize.getWidth() - 15, finalY + 22, { align: 'right' });
-            doc.setFont('helvetica', 'bold');
-            doc.text(reportSettings.teacherName || '(Nama Guru)', doc.internal.pageSize.getWidth() - 15, finalY + 40, { align: 'right' });
-            doc.setLineWidth(0.2);
-            doc.line(doc.internal.pageSize.getWidth() - 65, finalY + 41, doc.internal.pageSize.getWidth() - 15, finalY + 41);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`NIP: ${reportSettings.nip || '(NIP Guru)'}`, doc.internal.pageSize.getWidth() - 15, finalY + 46, { align: 'right' });
-
-            doc.save(`Laporan_Kehadiran_${new Date().toISOString().slice(0,10)}.pdf`);
+                doc.save(`Laporan_Rekap_Kehadiran_${kelasText}_${new Date().toISOString().slice(0,10)}.pdf`);
+            } catch (error) {
+                console.error("PDF Export Error:", error);
+                showToast("Gagal membuat laporan PDF. Silakan coba lagi.", "error");
+            }
         }
         function displayTopStudentsReport(reportData) {
             const container = document.getElementById('top-students-report');
@@ -1272,8 +1352,11 @@
             const container = document.getElementById('class-list');
             container.innerHTML = Object.keys(students).sort().map(name => `
                 <div id="class-item-${name}" class="p-2 border border-slate-700 rounded-md flex justify-between items-center cursor-pointer hover:bg-slate-700/50" onclick="viewStudentsInClass('${name}')">
-                    <span class="text-slate-300">${name}</span>
-                    <button onclick="event.stopPropagation(); deleteClass('${name}')" class="text-red-400 hover:text-red-300 text-xs">Hapus</button>
+                    <span class="text-slate-300 font-medium">${name}</span>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="event.stopPropagation(); editClass('${name}')" class="text-cyan-400 hover:text-cyan-300 text-xs font-semibold">Edit</button>
+                        <button onclick="event.stopPropagation(); deleteClass('${name}')" class="text-red-400 hover:text-red-300 text-xs font-semibold">Hapus</button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1290,12 +1373,50 @@
                 input.value = '';
             } else if(students[className]){ alert('Nama kelas sudah ada!'); }
         }
+        function editClass(oldClassName) {
+            const newClassName = prompt(`Edit nama kelas "${oldClassName}":`, oldClassName)?.trim().toUpperCase();
+
+            if (!newClassName || newClassName === oldClassName) {
+                return; // User cancelled or entered the same name
+            }
+
+            if (students[newClassName]) {
+                alert(`Nama kelas "${newClassName}" sudah ada. Silakan gunakan nama lain.`);
+                return;
+            }
+
+            // Move students to the new class name key and delete the old one
+            students[newClassName] = students[oldClassName];
+            delete students[oldClassName];
+
+            saveDataToStorage();
+            showToast(`Kelas "${oldClassName}" diubah menjadi "${newClassName}".`);
+
+            renderClassList();
+            updateClassDropdowns();
+
+            // If the edited class was being viewed, update the view to the new name
+            if (selectedClassForStudentManagement === oldClassName) {
+                viewStudentsInClass(newClassName);
+            }
+        }
         function deleteClass(className) {
-            if(confirm(`Yakin ingin menghapus kelas ${className}? Semua siswa di dalamnya juga akan terhapus.`)) {
+            if(confirm(`Yakin ingin menghapus kelas ${className}? Semua data siswa di kelas ini juga akan terhapus.`)) {
+                const studentsInClass = students[className] || [];
+                // Remove associated student user accounts
+                studentsInClass.forEach(student => {
+                    if (users[student.nis]) {
+                        delete users[student.nis];
+                    }
+                });
+                
                 delete students[className];
-                renderClassList(); updateClassDropdowns();
+                renderClassList(); 
+                updateClassDropdowns();
+                // If the deleted class was being viewed, view the first available class or null
                 viewStudentsInClass(Object.keys(students)[0] || null);
-                saveDataToStorage(); showToast(`Kelas ${className} telah dihapus.`);
+                saveDataToStorage(); 
+                showToast(`Kelas ${className} dan semua siswanya telah dihapus.`);
             }
         }
         function viewStudentsInClass(className) {
